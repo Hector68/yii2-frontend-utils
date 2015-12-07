@@ -8,6 +8,12 @@ class FrontendMonster extends AssetBundle
 {
     public $sourcePath = '@bower/frontend-monster/dist';
 
+    public $depends = [
+        'yii\web\JqueryAsset',
+        // !!! This is a dependency to CurrentTranslation !!!
+        'DevGroup\Polyglot\CurrentTranslation',
+    ];
+
     public function init ()
     {
         parent::init();
@@ -27,6 +33,6 @@ class FrontendMonster extends AssetBundle
                 'scripts/libs.min.js',
             ];
         }
-
     }
+
 }

@@ -18,16 +18,20 @@ class FrontendMonster extends AssetBundle
     {
         parent::init();
 
-        $this->css = [
-            YII_ENV_DEV ? 'styles/main.css' : 'styles/main.min.css',
-        ];
-
         if (YII_ENV_DEV) {
+            $this->css = [
+                'styles/main.css',
+                'styles/libs.css',
+            ];
             $this->js = [
                 'scripts/app.js',
                 'scripts/libs.js',
             ];
         } else {
+            $this->css = [
+                'styles/main.min.css',
+                'styles/libs.min.css',
+            ];
             $this->js = [
                 'scripts/app.min.js',
                 'scripts/libs.min.js',

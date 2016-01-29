@@ -16,16 +16,26 @@ class Annotator extends Component
     // https://regex101.com/r/xO4iB5/3
     const SCSS_REGEXP = '#(?U:(?<comment>(^\s*\/\/[^\r\n]*[\r\n]|^\s*\/\*.*\*\/[\r\n])*+)\s*+)(?<definition>([^\n\r]*)){(?P<inner>(?:[^{}]+|(?R))*)}#musS';
 
-    public $workingDirectory = './';
-
-    public function annotate($filename)
+    public function annotate($filename, $workingDirectory = './')
     {
         if ($this->isFileProcessed($filename)) {
             return [];
         }
         $this->putProcessedFile($filename);
 
-        $content = file_get_contents($this->workingDirectory . $filename);
+        if (file_exists($workingDirectory . $filename) === false) {
+            $filename = dirname($filename) . "/_" . basename($filename);
+        }
+        $filename = $workingDirectory . $filename;
+        if (file_exists($filename) === false) {
+            var_dump($filename, $workingDirectory, $this->processedFiles);die();
+        }
+
+        $workingDirectory = dirname($filename) . '/';
+
+
+
+        $content = file_get_contents($filename);
 
         Yii::beginProfile('Recursive annotate ' . $filename);
 
@@ -37,7 +47,7 @@ class Annotator extends Component
 
         Yii::endProfile('Find global variables definitions');
 
-        $tree = $this->recursiveAnnotate($content);
+        $tree = $this->recursiveAnnotate($content, '', $workingDirectory);
 
         Yii::endProfile('Recursive annotate ' . $filename);
 
@@ -51,7 +61,7 @@ class Annotator extends Component
      *
      * @return BemEntity[]
      */
-    public function recursiveAnnotate($content, $parentBemSelector = '')
+    public function recursiveAnnotate($content, $parentBemSelector = '', $workingDirectory = './')
     {
         $result = [];
 
@@ -66,7 +76,7 @@ class Annotator extends Component
             PREG_SET_ORDER
         );
         foreach ($imports as $import) {
-            $importedTree = $this->annotate($this->workingDirectory . $import . '.scss');
+            $importedTree = $this->annotate($import['file'] . '.scss', $workingDirectory);
             foreach ($importedTree as $item) {
                 $result [] = $item;
             }
@@ -101,7 +111,7 @@ class Annotator extends Component
                 && ($instance instanceof BemBlock || $instance instanceof BemElement)
             ) {
                 /** @var BemBlock|BemElement $instance */
-                $children = $this->recursiveAnnotate($originalInner, $instance->bemSelector);
+                $children = $this->recursiveAnnotate($originalInner, $instance->bemSelector, $workingDirectory);
                 foreach ($children as $child) {
                     if ($child instanceof BemModifier) {
                         $instance->modifiers[$child->name] = $child;
@@ -115,7 +125,7 @@ class Annotator extends Component
                 $result[] = $instance;
             } elseif (strlen($originalInner) > 0) {
                 // current scss section is some non bemmy stuff, just go deeper
-                $children = $this->recursiveAnnotate($originalInner, '');
+                $children = $this->recursiveAnnotate($originalInner, '', $workingDirectory);
 
                 foreach ($children as $child) {
                     $result[] = $child;

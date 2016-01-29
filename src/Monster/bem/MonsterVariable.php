@@ -88,9 +88,9 @@ class MonsterVariable extends BemDescribable
     public static function retrieveVariables($content, $bemSelector = '¯\_(ツ)_/¯')
     {
         $variables = [];
-        // find defined and used variables https://regex101.com/r/zE6yK9/2
+        // find defined and used variables https://regex101.com/r/zE6yK9/4
         $definedRegexp = '#(?<comment>^\s*(?U:\/\/[^\r\n]*[\r\n]|\/\*.*\*\/\s)*+)' .
-            '^\s*\$(?<name>[^\s:]*)(\s*:\s*[\'"]?(?<value>[^\'";\r\n]*)[\'"]?);\s*$#musS';
+            '^\s*\$(?<name>[^\s:]*)(\s*:\s*(?<value>[^;\r\n]*));\s*$#musS';
 
         $content = preg_replace_callback(
             $definedRegexp,

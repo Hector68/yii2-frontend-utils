@@ -78,7 +78,10 @@ class Annotator extends Component
         foreach ($imports as $import) {
             $importedTree = $this->annotate($import['file'] . '.scss', $workingDirectory);
             foreach ($importedTree as $item) {
-                $result [] = $item;
+                if (isset($result[$item->bemSelector])) {
+                    throw new \Exception("Bem entity {$item->bemSelector} redefined from import {$import['file']}");
+                }
+                $result[$item->bemSelector] = $item;
             }
         }
 
@@ -104,7 +107,7 @@ class Annotator extends Component
             static::findRelatedStuff($match['comment'], $match);
             $this->parseDefinition($match['definition'], $match);
 
-            $instance = BemEntity::unpack($match, $parentBemSelector);
+            $instance = BemEntity::unpack($match, $parentBemSelector, $workingDirectory);
 
 
             if (strlen($originalInner) > 0
@@ -128,7 +131,10 @@ class Annotator extends Component
                 $children = $this->recursiveAnnotate($originalInner, '', $workingDirectory);
 
                 foreach ($children as $child) {
-                    $result[] = $child;
+                    if (isset($result[$child->bemSelector])) {
+                        throw new \Exception("Bem entity redefined: {$child->bemSelector}");
+                    }
+                    $result[$child->bemSelector] = $child;
                 }
             }
         }

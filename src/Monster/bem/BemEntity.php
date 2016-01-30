@@ -55,6 +55,9 @@ class BemEntity extends BemDescribable
     /** @var BemEntity[] Global entity map for all BemEntity objects. Array keys - bemSelector */
     public static $globalIdentityMap = [];
 
+    /** @var string Working directory - where base scss file is located */
+    public $workingDirectory = './';
+
     public function init()
     {
         parent::init();
@@ -90,9 +93,10 @@ class BemEntity extends BemDescribable
      * Detects entity type automatically.
      * @param array  $data              Regexp matches array
      * @param string $parentBemSelector BEM selector of current entity parent
+     * @param string $workingDirectory  Working directory
      * @return BemEntity instance
      */
-    public static function unpack($data, $parentBemSelector = '')
+    public static function unpack($data, $parentBemSelector = '', $workingDirectory = './')
     {
         if (isset($data['bem-type'], $data['definition'], $data['inner'], $data['name']) === false) {
             return null;
@@ -136,6 +140,7 @@ class BemEntity extends BemDescribable
             $instance->bemSelector = $bemSelector;
         }
 
+        $instance->workingDirectory = $workingDirectory;
         $instance->unpackAdditionalAttributes($data, $mergeInstructions);
 
         static::$globalIdentityMap[$bemSelector] = $instance;

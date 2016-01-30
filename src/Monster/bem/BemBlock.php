@@ -3,6 +3,7 @@
 namespace DevGroup\Frontend\Monster\bem;
 
 use Yii;
+use yii\helpers\Json;
 
 /**
  * Class BemBlock represents BEM block.
@@ -23,6 +24,11 @@ class BemBlock extends BemEntity
      *             `@vendor/devgroup/yii2-frontend-utils/src/monster/materials/`.
      */
     public $bemJson = '';
+
+    /**
+     * @var array BEM Json tree
+     */
+    public $bemJsonTree = [];
 
     /**
      * @var string Class name of widget that renders this BEM block.
@@ -46,4 +52,14 @@ class BemBlock extends BemEntity
 
     /** @var BemElement[] Elements for this BEM Block */
     public $elements = [];
+
+    /** @inheritdoc */
+    public function unpackAdditionalAttributes(&$data, $mergeInstructions)
+    {
+        parent::unpackAdditionalAttributes($data, $mergeInstructions);
+        if (isset($this->bemJson)) {
+            $filename = $this->workingDirectory . $this->bemJson;
+            $this->bemJsonTree = Json::decode(file_get_contents($filename));
+        }
+    }
 }

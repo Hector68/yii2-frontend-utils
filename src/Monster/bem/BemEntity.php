@@ -4,6 +4,7 @@ namespace DevGroup\Frontend\Monster\bem;
 
 use Yii;
 use yii\base\Object;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class BemEntity is a base class for representing SCSS BEM entities(block, element, modifier)
@@ -58,10 +59,66 @@ class BemEntity extends BemDescribable
     /** @var string Working directory - where base scss file is located */
     public $workingDirectory = './';
 
+    public $serializationVariablesMapper = [];
+
     public function init()
     {
         parent::init();
         $this->innerExclusive = preg_replace(Annotator::SCSS_REGEXP, '', $this->inner);
+    }
+
+    /** @inheritdoc */
+    public function jsonSerialize()
+    {
+        return ArrayHelper::merge(
+            parent::jsonSerialize(),
+            [
+                'name' => $this->name,
+                'bemSelector' => $this->bemSelector,
+                'parentBemSelector' => $this->parentBemSelector,
+                'definition' => $this->definition,
+                'description' => $this->description,
+                'workingDirectory' => $this->workingDirectory,
+                'variablesMapper' => $this->getVariablesMapper(),
+            ]
+        );
+    }
+
+    /** @inheritdoc */
+    public function __sleep()
+    {
+        $this->serializationVariablesMapper = iterator_to_array($this->getVariablesMapper());
+        return ArrayHelper::merge(
+            parent::__sleep(),
+            [
+                'name',
+                'bemSelector',
+                'parentBemSelector',
+                'description',
+                'serializationVariablesMapper',
+            ]
+        );
+    }
+
+    public function getVariablesMapper()
+    {
+        foreach ($this->variablesUsed as $variable) {
+            yield $variable->name;
+        }
+    }
+
+    public function __wakeup()
+    {
+        parent::__wakeup();
+        $this->setVariablesMapper($this->serializationVariablesMapper);
+    }
+
+    public function setVariablesMapper($variables)
+    {
+        $variables = array_unique($variables);
+        foreach ($variables as $variable) {
+            $this->variablesUsed[] = MonsterVariable::instance($variable);
+        }
     }
 
     /**

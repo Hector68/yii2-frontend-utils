@@ -11,13 +11,15 @@ use yii\base\Object;
  *
  * @package DevGroup\Frontend\Monster\bem
  */
-class BemDescribable extends Object
+class BemDescribable extends Object implements \JsonSerializable
 {
     /** @var string Description of object -- @desc directive */
     public $description = '';
 
     /** @var MonsterGroup[] Array of references to groups that this object can affect - @groups directive */
     public $groups = [];
+
+    public $serializationGroupMapper = [];
 
     public function mapCommentsToProperties()
     {
@@ -43,7 +45,7 @@ class BemDescribable extends Object
 
     public function setGroupMapper($value)
     {
-        $groupNames = explode(',', $value);
+        $groupNames = is_array($value) === true ? $value : explode(',', $value);
         foreach ($groupNames as $name) {
             $name = trim($name);
             $instance = MonsterGroup::instance($name);
@@ -56,4 +58,43 @@ class BemDescribable extends Object
             $this->groups[] = &$instance;
         }
     }
+
+    public function getGroupMapper()
+    {
+        foreach ($this->groups as $group) {
+            yield $group->name;
+        }
+    }
+
+    /**
+     * Array of values for json serialization
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'class' => $this->className(),
+            'description' => $this->description,
+            'groupMapper' => $this->groupMapper,
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function __sleep()
+    {
+        $this->serializationGroupMapper = iterator_to_array($this->getGroupMapper());
+
+        return [
+            'description',
+            'serializationGroupMapper',
+        ];
+    }
+
+    public function __wakeup()
+    {
+        $this->setGroupMapper($this->serializationGroupMapper);
+    }
+
 }

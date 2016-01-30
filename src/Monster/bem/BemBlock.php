@@ -3,6 +3,7 @@
 namespace DevGroup\Frontend\Monster\bem;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 
 /**
@@ -62,4 +63,38 @@ class BemBlock extends BemEntity
             $this->bemJsonTree = Json::decode(file_get_contents($filename));
         }
     }
+
+    /** @inheritdoc */
+    public function jsonSerialize()
+    {
+        return ArrayHelper::merge(
+            parent::jsonSerialize(),
+            [
+                'bemJson' => $this->bemJson,
+                'bemJsonTree' => $this->bemJsonTree,
+                'widget' => $this->widget,
+                'widgetConfig' => $this->widgetConfig,
+                'modifiers' => $this->modifiers,
+                'elements' => $this->elements,
+            ]
+        );
+    }
+
+    /** @inheritdoc */
+    public function __sleep()
+    {
+        return ArrayHelper::merge(
+            parent::__sleep(),
+            [
+                'bemJson',
+                'bemJsonTree',
+                'widget',
+                'widgetConfig',
+                'description',
+                'modifiers',
+                'elements',
+            ]
+        );
+    }
+
 }

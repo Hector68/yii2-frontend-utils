@@ -28,5 +28,14 @@
         "psr-4": {
             "DevGroup\\Frontend\\Tests\\": "tests/"
         }
+    },
+    "extra": {
+      "yii2-extension": {
+        "name": "Frontend utils",
+        "name_ru": "Frontend утилиты",
+        "iconUrl": "https://st-1.dotplant.ru/images/ext-sample.png",
+        "description": "Various frontend components for yii2",
+        "description_ru": "Различные компоненты для yii2"
+      }
     }
 }

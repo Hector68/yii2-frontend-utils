@@ -21,33 +21,42 @@ class SuperAction extends yii\base\Action
     public function run()
     {
         $actionData = new ActionData($this->view);
-        foreach ($this->actions as $action) {
+        $actionData->controller = &$this->controller;
+
+        foreach ($this->actions as $index => $action) {
+            $profileKey = "SuperAction: $index";
+            Yii::beginProfile($profileKey);
             if (is_array($action)) {
                 $action = Yii::createObject($action);
             }
             /** @var UniversalAction $action */
             $action->run($actionData);
+            Yii::endProfile($profileKey);
         }
 
+        $result = null;
+        Yii::beginProfile('SuperAction: render');
         if ($this->isJsonRequested()) {
             Yii::$app->response->format =
                 Yii::$app->request->get($this->jsonpAttribute)
                     ? Response::FORMAT_JSONP
                     : Response::FORMAT_JSON;
 
-            return $actionData->result;
+            $result = $actionData->result;
         } elseif ($this->enableXml && $this->isXmlRequested()) {
             Yii::$app->response->format = Response::FORMAT_XML;
 
-            return $actionData->result;
+            $result = $actionData->result;
         } elseif ($actionData->content !== null) {
-            return $this->controller->renderContent($actionData->content);
+            $result = $this->controller->renderContent($actionData->content);
         } else {
             if ($actionData->viewFile === null) {
                 $actionData->viewFile = $this->id;
             }
-            return $this->controller->render($actionData->viewFile, $actionData->result);
+            $result = $this->controller->render($actionData->viewFile, $actionData->result);
         }
+        Yii::endProfile('SuperAction: render');
+        return $result;
     }
 
     protected function isJsonRequested()

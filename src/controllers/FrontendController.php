@@ -2,7 +2,7 @@
 
 namespace DevGroup\Frontend\controllers;
 
-use Yii;
+use yii;
 use yii\base\ViewEvent;
 use yii\helpers\Url;
 use yii\web\Controller;

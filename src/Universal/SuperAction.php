@@ -2,6 +2,7 @@
 
 namespace DevGroup\Frontend\Universal;
 
+use DevGroup\Frontend\helpers\RequestHelper;
 use yii;
 use yii\web\Response;
 
@@ -36,15 +37,15 @@ class SuperAction extends yii\base\Action
 
         $result = null;
         Yii::beginProfile('SuperAction: render');
-        
-        if ($this->isJsonRequested()) {
+
+        if (RequestHelper::isJsonRequested()) {
             Yii::$app->response->format =
                 Yii::$app->request->get($this->jsonpAttribute)
                     ? Response::FORMAT_JSONP
                     : Response::FORMAT_JSON;
 
             $result = $actionData->result;
-        } elseif ($this->enableXml && $this->isXmlRequested()) {
+        } elseif ($this->enableXml && RequestHelper::isXmlRequested()) {
             Yii::$app->response->format = Response::FORMAT_XML;
 
             $result = $actionData->result;
@@ -60,15 +61,5 @@ class SuperAction extends yii\base\Action
         return $result;
     }
 
-    protected function isJsonRequested()
-    {
-        return array_key_exists('application/json', Yii::$app->request->acceptableContentTypes)
-            || array_key_exists('application/javascript', Yii::$app->request->acceptableContentTypes);
-    }
 
-    protected function isXmlRequested()
-    {
-        return array_key_exists('text/xml', Yii::$app->request->acceptableContentTypes)
-            || array_key_exists('application/xml', Yii::$app->request->acceptableContentTypes);
-    }
 }

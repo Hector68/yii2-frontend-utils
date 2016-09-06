@@ -17,7 +17,7 @@ class SuperAction extends yii\base\Action
     public $jsonpAttribute = 'callback';
     public $enableXml = false;
     public $view;
-    
+
     public function run()
     {
         $actionData = new ActionData($this->view);
@@ -36,6 +36,7 @@ class SuperAction extends yii\base\Action
 
         $result = null;
         Yii::beginProfile('SuperAction: render');
+        
         if ($this->isJsonRequested()) {
             Yii::$app->response->format =
                 Yii::$app->request->get($this->jsonpAttribute)
@@ -61,13 +62,13 @@ class SuperAction extends yii\base\Action
 
     protected function isJsonRequested()
     {
-        return in_array('application/json', Yii::$app->request->acceptableContentTypes, true)
-            || in_array('application/javascript', Yii::$app->request->acceptableContentTypes, true);
+        return array_key_exists('application/json', Yii::$app->request->acceptableContentTypes)
+            || array_key_exists('application/javascript', Yii::$app->request->acceptableContentTypes);
     }
 
     protected function isXmlRequested()
     {
-        return in_array('text/xml', Yii::$app->request->acceptableContentTypes, true)
-            || in_array('application/xml', Yii::$app->request->acceptableContentTypes, true);
+        return array_key_exists('text/xml', Yii::$app->request->acceptableContentTypes)
+            || array_key_exists('application/xml', Yii::$app->request->acceptableContentTypes);
     }
 }

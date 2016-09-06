@@ -10,7 +10,13 @@ use yii\web\Response;
 trait ContentNegotiator
 {
     public $requestJson;
-    private $negotiatorRunned = false;
+    private $negotiatorProcessed = false;
+    public $negotiatorFormats = [
+        'application/json' => Response::FORMAT_JSON,
+        'text/javascript' => Response::FORMAT_JSONP,
+        'text/xml' => Response::FORMAT_XML,
+        'text/html' => Response::FORMAT_HTML,
+    ];
 
     /**
      * @todo Add checking for correct rights
@@ -19,18 +25,13 @@ trait ContentNegotiator
      */
     public function negotiate()
     {
-        if ($this->negotiatorRunned === true) {
+        if ($this->negotiatorProcessed === true) {
             return;
         }
         /** @var ContentNegotiator $negotiator */
         $negotiator = Yii::createObject([
             'class' => yii\filters\ContentNegotiator::class,
-            'formats' => [
-                'application/json' => Response::FORMAT_JSON,
-                'text/javascript' => Response::FORMAT_JSONP,
-                'text/xml' => Response::FORMAT_XML,
-                'text/html' => Response::FORMAT_HTML,
-            ],
+            'formats' => $this->negotiatorFormats,
 //            @todo implement retrieving languages if yii2-multilingual enabled
 //            'languages' => [],
         ]);
@@ -53,6 +54,6 @@ trait ContentNegotiator
                 throw new BadRequestHttpException;
             }
         }
-        $this->negotiatorRunned = true;
+        $this->negotiatorProcessed = true;
     }
 }

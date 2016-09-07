@@ -47,4 +47,12 @@ class RequestHelper
                 ? Response::FORMAT_JSONP
                 : Response::FORMAT_JSON;
     }
+
+    public static function jsonpFormat($data, $jsonpAttribute = 'callback')
+    {
+        if (Yii::$app->response->format === Response::FORMAT_JSONP) {
+            $data['callback'] = Yii::$app->request->get($jsonpAttribute);
+        }
+        return $data;
+    }
 }

@@ -44,6 +44,10 @@ class SuperAction extends yii\base\Action
                     ? Response::FORMAT_JSONP
                     : Response::FORMAT_JSON;
 
+            if (Yii::$app->response->format === Response::FORMAT_JSONP) {
+                $actionData->result['callback'] = Yii::$app->request->get($this->jsonpAttribute);
+            }
+
             $result = $actionData->result;
         } elseif ($this->enableXml && RequestHelper::isXmlRequested()) {
             Yii::$app->response->format = Response::FORMAT_XML;

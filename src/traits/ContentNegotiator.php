@@ -12,10 +12,10 @@ trait ContentNegotiator
     public $requestJson;
     private $negotiatorProcessed = false;
     public $negotiatorFormats = [
+        'text/html' => Response::FORMAT_HTML,
         'application/json' => Response::FORMAT_JSON,
         'text/javascript' => Response::FORMAT_JSONP,
         'text/xml' => Response::FORMAT_XML,
-        'text/html' => Response::FORMAT_HTML,
     ];
 
     /**
